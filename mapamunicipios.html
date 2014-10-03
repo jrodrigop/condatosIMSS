@@ -1,0 +1,138 @@
+<html>
+    <head>
+        <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+        <script src="http://d3js.org/topojson.v0.min.js"></script>
+    </head>
+    <body>	
+        <script>
+            var width = 800, height = 800, centered;
+            var svg = d3.select("body").append("svg")
+                    .attr({"width": width, "height": height});
+
+            var projection = d3.geo.mercator()
+                    .scale(1500)
+                    .center([-99.13320799999997, 25.8026077]);
+
+            var path = d3.geo.path()
+                    .projection(projection);
+
+            var g = svg.append("g");
+
+            var color = d3.scale.linear()
+                    .domain([0, 16000000])
+                    .range(["yellow", "red"]);
+
+
+            d3.json("mx.json", function(error, mx) {
+                //console.log(mx);
+                g.append("g")
+                        .attr("id", "states")
+                        .selectAll("path")
+                        .data(topojson.object(mx, mx.objects.municipalities).geometries)
+                        .enter().append("path")
+                        .attr("d", path)
+                        
+                        .attr("fill", "#199E9E")
+                        .attr("fill", "rgba(0,0,"+ Math.random()*100 +",1)")
+                        .attr("stroke", "rgba(25,158,156,.2)")
+                        //.attr("")
+                        //.attr("stroke-whidth","2px")
+                        .on("click", function(d) {
+                            //console.log(d);
+                            var x, y, k;
+                            if (d && centered !== d) {
+                                var centroid = path.centroid(d);
+                                x = centroid[0];
+                                y = centroid[1];
+                                k = 4;
+                                centered = d;
+                            } else {
+                                x = width / 2;
+                                y = height / 2;
+                                k = 1;
+                                centered = null;
+                            }
+
+                            g.selectAll("path")
+                                    .classed("active", centered && function(d) {
+                                        return d === centered;
+                                    });
+
+                            g.transition()
+                                    .duration(750)
+                                    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
+
+                        })
+
+                //var coordinates = projection([-99.13320799999997, 19.4326077]);
+                    /////////////////////////////////////////////////////////////////
+                     d3.csv("cordenadas.csv", function(error,puntos){
+                            //.log(puntos);
+                            var punto =puntos;
+
+                            var coordinates=projection([puntos.Longitud,puntos.Latitud])
+                             g.selectAll("circule").data(punto).enter()
+                               .append("circle")
+                               .attr("r","1")
+                               .attr("fill", "rgba(255,0,0,.5)")
+                               .attr("cx",function (d){
+                                   return projection([d.Longitud,d.Latitud])[0];
+                               })
+                               .attr("cy",function (d){
+                                   return projection([d.Longitud,d.Latitud])[1];
+                               })
+                                
+                               });
+                    //////////////////////////////////////////////////////////////
+
+                document.getElementById("uno").addEventListener("click", function() {
+                    d3.csv("cordenadas3.csv", function(error, puntos) {
+                       // console.log(puntos);
+                        var punto = puntos;
+
+                        var coordinates = projection([puntos.Longitud, puntos.Latitud])
+                        g.selectAll("circule").data(punto).enter()
+                                .append("circle")
+                                .attr("r", function(d) {
+                                    if(d.imssadis==null){
+                                        return .1;
+                                    }
+                                    else{
+                                    return Math.exp((d.imssadis - 45) / 23);
+                                }
+                                })
+                                .attr("fill", "rgba(155,252,221,.5)")
+                                .attr("cx", function(d) {
+                                    return projection([d.Longitud, d.Latitude])[0];
+                                })
+                                .attr("cy", function(d) {
+                                    return projection([d.Longitud, d.Latitude])[1];
+                                })
+
+                    });
+                    //////////////////////////////////////////////////////////////////////////
+                      document.getElementById("dos").addEventListener("click", function() {
+                    alert("hi");
+                    d3.csv("marginacion2.csv", function(densidad){
+                            for (i = 0; i < densidad.length; i++) { 
+                                    
+                                }
+    		
+                });
+                    });
+                    ///////////////////////////////////////////////////////////////////////////
+                
+             });
+            });
+
+
+
+        </script>
+        <div class="botones" id="uno">
+            boton1
+        </div>
+        <div class="botones" id="dos">
+            boton2
+        </div>
+    </body>	
+</html>
